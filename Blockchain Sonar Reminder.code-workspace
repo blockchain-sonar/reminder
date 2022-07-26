@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "docs"
+		},
+		{
+			"path": "backend"
+		},
+		{
+			"path": "frontend"
+		},
+		{
+			"name": "workspace",
+			"path": "."
+		},
+	],
+	"settings": {
+		"files.autoSave": "afterDelay",
+		"files.autoSaveDelay": 3000
+	}
+}
