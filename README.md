@@ -30,4 +30,10 @@ python3.10 -m unittest -v
 1. Open the project in VSCode
 1. Create copy `.env-example` -> `.env`
 1. Configure `.env` by your own
+1. Open terminal and prepare Python's Virtual Environment
+    ```
+    python3.10 -m venv .venv
+    source .venv/bin/activate
+    pip install --requirement requirements-dev.txt
+    ```
 1. Start debugging by "Backend App" launch configuration

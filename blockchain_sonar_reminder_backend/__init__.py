@@ -4,11 +4,14 @@
 #
 
 from typing import Optional
-from flask import Flask, Response, current_app, g
+from flask import Flask, Response
 from werkzeug.exceptions import HTTPException
 
 import os
+
 from blockchain_sonar_reminder_backend.bots.telegram.telegram_bot import TelegramBot
+
+from blockchain_sonar_reminder_backend.controllers.static import StaticController
 
 from blockchain_sonar_reminder_backend.services.reminder import ReminderService
 
@@ -24,21 +27,14 @@ def create_app():
 
 	app.config.from_prefixed_env("BSR")
 
-
-	app.config.get("TELEGRAMBOT_TOKEN")
-
-	reminder_service = ReminderService()
-
-	from blockchain_sonar_reminder_backend.controllers.static import StaticController
-	from blockchain_sonar_reminder_backend.bots.telegram.telegram_bot import TelegramBot
-
 	telegram_bot_token: Optional[str] = app.config.get("TELEGRAMBOT_TOKEN")
 	if telegram_bot_token is None:
 		raise Exception("TELEGRAMBOT_TOKEN was not provided")
 
+	reminder_service = ReminderService()
+
 	telegram_bot = TelegramBot(reminder_service, telegram_bot_token)
 	app.config["telegram_bot"] = telegram_bot
-	app.teardown_appcontext(_dispose_telegram_bot)
 	telegram_bot.__enter__()
 
 	app.register_error_handler(HTTPException, _handle_exception)
@@ -63,7 +59,3 @@ def _handle_exception(e: HTTPException) -> None:
 	response.headers = {"BS-REASON-PHRASE": e.name}
 	return response
 
-def _dispose_telegram_bot(e=None):
-	telegram_bot = current_app.config.get("telegram_bot", None)
-	if telegram_bot is not None and isinstance(telegram_bot, TelegramBot):
-		telegram_bot.__exit__()

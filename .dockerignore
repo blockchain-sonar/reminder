@@ -1,5 +1,5 @@
 ./*
 
-!/blockchain_sonar_backend
+!/blockchain_sonar_reminder_backend
 !/docker/docker-entrypoint.sh
 !/requirements.txt
