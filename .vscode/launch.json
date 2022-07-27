@@ -1,0 +1,29 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			// See for Flask Tutorial in Visual Studio Code: https://code.visualstudio.com/docs/python/tutorial-flask
+			"name": "Backend App",
+			"type": "python",
+			"request": "launch",
+			"cwd": "${workspaceFolder}",
+			"module": "flask",
+			"env": {
+				"PYTHONPATH": "${workspaceFolder}",
+				"FLASK_APP": "blockchain_sonar_reminder_backend",
+				"FLASK_ENV": "development",
+				"FLASK_DEBUG": "0"
+			},
+			"args": [
+				"run",
+				"--no-debugger",
+				"--no-reload"
+			],
+			"envFile": "${workspaceFolder}/.env",
+			"console": "internalConsole"
+		}
+	]
+}
