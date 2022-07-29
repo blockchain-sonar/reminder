@@ -1,8 +1,10 @@
+from chevron import render
 from threading import Event
 from typing import Optional
+from urllib.parse import quote, ParseResult
 
-from telegram import Chat, Message, ParseMode, Update
-from telegram.ext import CallbackContext, CommandHandler, Handler, Updater
+from telegram import Chat, KeyboardButton, Message, ParseMode, ReplyKeyboardMarkup, Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import CallbackContext, CommandHandler, Filters, Handler, MessageHandler, Updater
 from telegram.utils.helpers import escape_markdown
 
 from blockchain_sonar_reminder_backend.services.reminder import ReminderService
@@ -41,6 +43,12 @@ class TelegramBot:
 
 		status_handler = CommandHandler('reminders', self._authorize(self._list_reminders))
 		self._updater.dispatcher.add_handler(status_handler)
+
+		reminderAdd_handler = CommandHandler('reminderAdd', self._reminderAdd)
+		self._updater.dispatcher.add_handler(reminderAdd_handler)
+
+		reminderRemove_handler = CommandHandler('reminderRemove', self._reminderRemove)
+		self._updater.dispatcher.add_handler(reminderRemove_handler)
 
 		# echo_handler = MessageHandler(Filters.text & (~Filters.command), self._message)
 		# self._updater.dispatcher.add_handler(echo_handler)
@@ -85,6 +93,41 @@ class TelegramBot:
 
 	def _start(self, update: Update, context: CallbackContext) -> None:
 		context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a Blockchain Sonar's Reminder Bot, please talk to me!")
+
+	def __enter__(self):
+		self._updater.start_polling()
+		return self
+
+	def __exit__(self, type, value, traceback):
+		self._updater.stop()
+		pass
+
+	def idle(self) -> None:
+		self._updater.idle()
+
+	def _reminderRemove(self, update: Update, context: CallbackContext) -> None:
+		context.bot.send_message(chat_id=update.effective_chat.id, text="I'm work too!")
+
+	def __enter__(self):
+		self._updater.start_polling()
+		return self
+
+	def __exit__(self, type, value, traceback):
+		self._updater.stop()
+		pass
+
+	def idle(self) -> None:
+		self._updater.idle()
+
+	def _reminderAdd(self, update: Update, context: CallbackContext) -> None:
+		context.bot.send_message(chat_id=update.effective_chat.id, text="I'm work!")
+
+
+
+
+
+
+
 
 	# def _message(self, update: Update, context: CallbackContext) -> None:
 	# 	context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
