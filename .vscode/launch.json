@@ -15,7 +15,9 @@
 				"PYTHONPATH": "${workspaceFolder}",
 				"FLASK_APP": "blockchain_sonar_reminder_backend",
 				"FLASK_ENV": "development",
-				"FLASK_DEBUG": "0"
+				"FLASK_DEBUG": "0",
+				"FLASK_RUN_HOST": "127.0.0.1",
+				"FLASK_RUN_PORT": "8080"
 			},
 			"args": [
 				"run",

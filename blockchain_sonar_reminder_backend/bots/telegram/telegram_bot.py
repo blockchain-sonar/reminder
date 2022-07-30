@@ -1,11 +1,12 @@
-import threading
-from urllib.parse import quote, ParseResult
-from chevron import render
+from threading import Event
+from typing import Optional
+
 from telegram import Chat, Message, ParseMode, Update
-from telegram.ext import CallbackContext, CommandHandler, Filters, Handler, MessageHandler, Updater
+from telegram.ext import CallbackContext, CommandHandler, Handler, Updater
 from telegram.utils.helpers import escape_markdown
+
 from blockchain_sonar_reminder_backend.services.reminder import ReminderService
-from blockchain_sonar_reminder_backend.utils.resources import render_message
+from blockchain_sonar_reminder_backend.utils.resources import render_template_message
 
 class _TelegramMarkdownWrap:
 	def __init__(self, wrap) -> None:
@@ -24,9 +25,11 @@ class _TelegramMarkdownWrap:
 
 class TelegramBot:
 
-	def __init__(self, reminder_service: ReminderService, telegram_token: str) -> None:
+	def __init__(self, reminder_service: ReminderService, telegram_token: str, webhook_url: Optional[str]) -> None:
 		assert isinstance(reminder_service, ReminderService)
 		assert isinstance(telegram_token, str)
+
+		self._webhook_url = webhook_url
 
 		self._updater = None
 		self._reminder_service = reminder_service
@@ -44,8 +47,33 @@ class TelegramBot:
 
 		pass
 
+	@property
+	def underlaying_bot(self):
+		return self._updater.bot
+
+	@property
+	def update_queue(self):
+		return self._updater.update_queue
+
 	def __enter__(self):
-		self._updater.start_polling()
+		webhook_url = self._webhook_url
+		if webhook_url is None:
+			# Using Telegram polling due webhook URL was not provided
+			# TODO exclude for test/production zones
+			self._updater.start_polling()
+		else:
+			# Using Telegram webhook for callbacks
+			is_success_setup_webhook = self._updater.bot.set_webhook(webhook_url)
+			if not is_success_setup_webhook:
+				raise Exception("Failure to set Telegram webhook URL.")
+
+			# Replace piece of logig from start_polling()
+			self._updater.running = True
+			self._updater.job_queue.start()
+			dispatcher_ready = Event()
+			self._updater._init_thread(self._updater.dispatcher.start, "dispatcher", ready=dispatcher_ready)
+			dispatcher_ready.wait()
+
 		return self
 
 	def __exit__(self, type, value, traceback):
@@ -78,7 +106,7 @@ class TelegramBot:
 				]
 			}
 
-			response_text: str = render_message(__name__, "reminders.mustache.txt", render_context)
+			response_text: str = render_template_message(__name__, "reminders.mustache.txt", render_context)
 
 			context.bot.send_message(
 				chat_id = update.effective_chat.id,

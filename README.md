@@ -7,7 +7,7 @@ pip install --requirement requirements-dev.txt
 export BSR_xxxxxx=.... # export all necessary configuration values. See .env-example file for details.
 FLASK_APP=blockchain_sonar_reminder_backend python -m flask run
 ```
-* In a browser, open [http://127.0.0.1:5000/webapp/](http://127.0.0.1:5000/webapp/)
+* In a browser, open [http://127.0.0.1:8080/webapp/](http://127.0.0.1:8080/webapp/)
 
 ## Run tests
 
@@ -31,9 +31,15 @@ python3.10 -m unittest -v
 1. Create copy `.env-example` -> `.env`
 1. Configure `.env` by your own
 1. Open terminal and prepare Python's Virtual Environment
-    ```
-    python3.10 -m venv .venv
-    source .venv/bin/activate
-    pip install --requirement requirements-dev.txt
-    ```
+	```
+	python3.10 -m venv .venv
+	source .venv/bin/activate
+	pip install --requirement requirements-dev.txt
+	```
+1. Optionally (only for bots with webhook), open separate terminal
+	* Start `ngrok` to pass local port into Internet
+	```
+	ngrok http 8080
+	```
+	* Set `BSR_CALLBACK_BASE_URL` to NGROK's URL
 1. Start debugging by "Backend App" launch configuration

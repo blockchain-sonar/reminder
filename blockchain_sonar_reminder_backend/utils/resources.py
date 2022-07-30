@@ -25,7 +25,7 @@ def read_resource_json(resource_path: str) -> dict:
 
 	return json_data
 
-def render_message(package: str, template_name: str, data_context: Any) -> str:
+def render_template_message(package: str, template_name: str, data_context: Any) -> str:
 	assert isinstance(package, str)
 	assert isinstance(template_name, str)
 	# assert isinstance(data_context, dict)
