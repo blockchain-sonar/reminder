@@ -93,7 +93,6 @@ class TelegramBot:
 
 	def _start(self, update: Update, context: CallbackContext) -> None:
 		context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a Blockchain Sonar's Reminder Bot, please talk to me!")
-	
 	# def _message(self, update: Update, context: CallbackContext) -> None:
 	# 	context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
 
