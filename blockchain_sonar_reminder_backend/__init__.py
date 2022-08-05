@@ -10,9 +10,11 @@ from werkzeug.exceptions import HTTPException
 import os
 
 from blockchain_sonar_reminder_backend.bots.telegram.telegram_bot import TelegramBot
+from blockchain_sonar_reminder_backend.bots.viber.viber_bot import ViberBot
 
 from blockchain_sonar_reminder_backend.controllers.static import StaticController
 from blockchain_sonar_reminder_backend.controllers.telegram_webhook_handler import TelegramWebhookHandlerController
+from blockchain_sonar_reminder_backend.controllers.viber_webhook_handler import ViberWebhookHandlerController
 
 from blockchain_sonar_reminder_backend.services.reminder import ReminderService
 
@@ -80,7 +82,7 @@ def create_app():
 
 	# Register TelegramWebhookHandlerController
 	if viber_bot_webhook_url_prefix is not None:
-		viber_webhook_handler_controller = ViberWebhookHandlerController(bot=viber_bot.underlaying_bot, update_queue=viber_bot.update_queue)
+		viber_webhook_handler_controller = ViberWebhookHandlerController(bot=viber_bot)
 		app.register_blueprint(viber_webhook_handler_controller.blueprint, url_prefix=viber_bot_webhook_url_prefix)
 
 	#

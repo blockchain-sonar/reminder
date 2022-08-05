@@ -1,95 +1,90 @@
+from threading import Event
 import threading
-from urllib.parse import quote, ParseResult
-from chevron import render
-from blockchain_sonar_reminder_backend.services.reminder import ReminderService
-from blockchain_sonar_reminder_backend.utils.resources import render_message, render_template_message
+import time
+from typing import Optional
 
-from flask import Flask, request, Response
 from viberbot import Api
 from viberbot.api.bot_configuration import BotConfiguration
 from viberbot.api.messages import VideoMessage
 from viberbot.api.messages.text_message import TextMessage
-import logging
 
-from viberbot.api.viber_requests import ViberConversationStartedRequest
-from viberbot.api.viber_requests import ViberFailedRequest
+from blockchain_sonar_reminder_backend.services.reminder import ReminderService
+from blockchain_sonar_reminder_backend.utils.resources import render_template_message
 from viberbot.api.viber_requests import ViberMessageRequest
-from viberbot.api.viber_requests import ViberSubscribedRequest
-from viberbot.api.viber_requests import ViberUnsubscribedRequest
 
-import time
+class ViberBot:
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+	def __init__(self, reminder_service: ReminderService, viber_token: str, webhook_url: Optional[str]) -> None:
+		assert isinstance(reminder_service, ReminderService)
+		assert isinstance(viber_token, str)
 
-app = Flask(__name__)
+		self._webhook_url = webhook_url
 
-viber = Api(BotConfiguration(
-	name='Oleg Reminder Bot',
-	avatar='http://site.com/avatar.jpg',
-	auth_token='4f912f3262a7e3a7-ad5fec7947a3f090-8be63ffab7a8e7a9'
-))
+		self._viber_api = Api(BotConfiguration(
+			name='Oleg Reminder Bot',
+			avatar='http://site.com/avatar.jpg',
+			auth_token=viber_token
+		))
 
-def activate_lazy_set_webhook_job():
-	def run_job():
-		time.sleep(3)
-		viber.set_webhook('https://1d60-5-53-113-77.eu.ngrok.io')
+		self._reminder_service = reminder_service
 
-	thread = threading.Thread(target=run_job)
-	thread.start()
+	def __enter__(self):
+		def activate_lazy_set_webhook_job():
+			def run_job():
+				time.sleep(3)
+				self._viber_api.set_webhook('https://1d60-5-53-113-77.eu.ngrok.io/webhook/viber')
 
-@app.route('/', methods=['POST'])
-def incoming():
-	if not viber.verify_signature(request.get_data(), request.headers.get('X-Viber-Content-Signature')):
-		return Response(status=403)
+			thread = threading.Thread(target=run_job)
+			thread.start()
 
-	# this library supplies a simple way to receive a request object
-	viber_request = viber.parse_request(request.get_data())
+#		activate_lazy_set_webhook_job()
+		return self
 
-	if isinstance(viber_request, ViberConversationStartedRequest):
-		message = "I'm a Blockchain Sonar's Reminder Bot, please talk to me!"
-		viber.send_messages(viber_request.sender.id, [message])
-	elif isinstance(viber_request, ViberSubscribedRequest):
-		viber.send_messages(viber_request.get_user.id, [
-			TextMessage(text="thanks for subscribing!")
-		])
-	elif isinstance(viber_request, ViberFailedRequest):
-		logger.warn("client failed receiving message. failure: {0}".format(viber_request))
+	def __exit__(self, type, value, traceback):
+		self._updater.stop()
+		pass
 
-	if isinstance(viber_request, ViberMessageRequest):
+	@property
+	def underlaying_bot(self):
+		return self._viber_api
+	
+	def onmessage(self, viber_request: ViberMessageRequest) -> None:
 		if viber_request.message == "/reminders":
-			viber.send_messages(viber_request.sender.id, [
-			_list_reminders()
-		])
-		
-	elif isinstance(viber_request, ViberFailedRequest):
-		logger.warn("client failed receiving message. failure: {0}".format(viber_request))
+			self._list_reminders(viber_request)
+		else:
+			raise Exception("Unsupported command: %s" % viber_request.message)
 
-	return Response(status=200)
+	def _list_reminders(self, viber_request: ViberMessageRequest) -> None:
+		try:
+			message = viber_request.message
+			# bot_name = message.bot.name
+			# text = message.text
 
-def _list_reminders() -> None:
-	try:
-		render_context: list = {
-			"remiders":[
-				{
-					"tag": "Ololo 1"
-				},
-				{
-					"tag": "Ololo 2"
-				}
-			]
-		}
+			render_context: list = {
+				"remiders":[
+					{
+						"tag": "Ololo 1"
+					},
+					{
+						"tag": "Ololo 2"
+					}
+				]
+			}
 
-		response_text: str = render_template_message(__name__, "reminders.mustache.txt", render_context)
-		return response_text
-	except Exception as ex:
-		return ex
-	pass
+			response_text: str = render_template_message(__name__, "reminders.mustache.txt", render_context)
 
-if __name__ == "__main__":
-	activate_lazy_set_webhook_job()
-	app.run(host='127.0.0.1', port=8080, debug=False)
+			# context.bot.send_message(
+			# 	chat_id = update.effective_chat.id,
+			# 	reply_to_message_id = message.message_id,
+			# 	text = response_text,
+			# 	parse_mode = ParseMode.MARKDOWN
+			# )
+		except Exception as ex:
+			# context.bot.send_message(
+			# 	chat_id = update.effective_chat.id,
+			# 	reply_to_message_id = message.message_id,
+			# 	text = str(ex)
+			# )
+			pass
+		pass
+
