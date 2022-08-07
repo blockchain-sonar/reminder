@@ -14,15 +14,15 @@ from viberbot.api.viber_requests import ViberMessageRequest
 
 class ViberBot:
 
-	def __init__(self, reminder_service: ReminderService, viber_token: str, webhook_url: Optional[str]) -> None:
+	def __init__(self, reminder_service: ReminderService, viber_token: str, webhook_url: Optional[str], bot_name: str, avatar_link: str) -> None:
 		assert isinstance(reminder_service, ReminderService)
 		assert isinstance(viber_token, str)
 
 		self._webhook_url = webhook_url
 
 		self._viber_api = Api(BotConfiguration(
-			name='Oleg Reminder Bot',
-			avatar='http://site.com/avatar.jpg',
+			name=bot_name,
+			avatar=avatar_link,
 			auth_token=viber_token
 		))
 
@@ -32,16 +32,16 @@ class ViberBot:
 		def activate_lazy_set_webhook_job():
 			def run_job():
 				time.sleep(3)
-				self._viber_api.set_webhook('https://1d60-5-53-113-77.eu.ngrok.io/webhook/viber')
+				self._viber_api.set_webhook(self._webhook_url)
 
 			thread = threading.Thread(target=run_job)
 			thread.start()
 
-#		activate_lazy_set_webhook_job()
+		activate_lazy_set_webhook_job()
 		return self
 
 	def __exit__(self, type, value, traceback):
-		self._updater.stop()
+		#self._updater.stop()
 		pass
 
 	@property
@@ -73,6 +73,8 @@ class ViberBot:
 
 			response_text: str = render_template_message(__name__, "reminders.mustache.txt", render_context)
 
+
+			self._viber_api.send_messages(viber_request.sender.id, [response_text])
 			# context.bot.send_message(
 			# 	chat_id = update.effective_chat.id,
 			# 	reply_to_message_id = message.message_id,

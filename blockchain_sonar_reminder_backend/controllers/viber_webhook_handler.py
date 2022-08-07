@@ -36,12 +36,11 @@ class ViberWebhookHandlerController(object):
 		viber_request = self._bot.underlaying_bot.parse_request(request.get_data())
 
 		if isinstance(viber_request, ViberConversationStartedRequest):
-			message = "I'm a Blockchain Sonar's Reminder Bot, please talk to me!"
-			self._bot.underlaying_bot.send_messages(viber_request.sender.id, [message])
-		elif isinstance(viber_request, ViberSubscribedRequest):
-			self._bot.underlaying_bot.send_messages(viber_request.get_user.id, [
-				TextMessage(text="thanks for subscribing!")
-			])
+			pass
+		# elif isinstance(viber_request, ViberSubscribedRequest):
+		# 	self._bot.underlaying_bot.send_messages(viber_request.get_user.id, [
+		# 		TextMessage(text="thanks for subscribing!")
+		# 	])
 		elif isinstance(viber_request, ViberFailedRequest):
 			#logger.warn("client failed receiving message. failure: {0}".format(viber_request))
 			pass

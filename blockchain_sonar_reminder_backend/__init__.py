@@ -36,6 +36,8 @@ def create_app():
 	callback_base_url: Optional[str] = app.config.get("CALLBACK_BASE_URL")
 	telegram_bot_token: Optional[str] = app.config.get("TELEGRAMBOT_TOKEN")
 	viber_bot_token: Optional[str] = app.config.get("VIBER_TOKEN")
+	viber_bot_name: Optional[str] = app.config.get("VIBER_BOT_NAME")
+	viber_avatar_link: Optional[str] = app.config.get("VIBER_AVATAR_LINK")
 
 	if telegram_bot_token is None:
 		raise Exception("TELEGRAMBOT_TOKEN was not provided")
@@ -57,7 +59,7 @@ def create_app():
 	#
 	reminder_service = ReminderService()
 	telegram_bot = TelegramBot(reminder_service, telegram_bot_token, telegram_bot_webhook_url)
-	viber_bot = ViberBot(reminder_service, viber_bot_token, viber_bot_webhook_url)
+	viber_bot = ViberBot(reminder_service, viber_bot_token, viber_bot_webhook_url, viber_bot_name, viber_avatar_link)
 
 
 	#
