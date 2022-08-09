@@ -51,11 +51,12 @@ class ViberBot:
 	def onmessage(self, viber_request: ViberMessageRequest) -> None:
 		if isinstance(viber_request, ViberMessageRequest):
 			if viber_request.message.text == "/reminders":
+				message_text: str = self._list_reminders(viber_request)
 				self._viber_api.send_messages(viber_request.sender.id, [
-				self._list_reminders(viber_request)
-			])
+					TextMessage(text = message_text)
+				])
 			else:
-				self._viber_api.send_messages(viber_request.sender.id, ["Unsupported command"])
+				self._viber_api.send_messages(viber_request.sender.id, [TextMessage(text ="Unsupported command")])
 				raise Exception("Unsupported command: %s" % viber_request.message)
 		else:
 			raise Exception("Failed receiving message")
