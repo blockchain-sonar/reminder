@@ -49,17 +49,19 @@ class ViberBot:
 		return self._viber_api
 	
 	def onmessage(self, viber_request: ViberMessageRequest) -> None:
-		if viber_request.message == "/reminders":
-			self._list_reminders(viber_request)
+		if isinstance(viber_request, ViberMessageRequest):
+			if viber_request.message.text == "/reminders":
+				self._viber_api.send_messages(viber_request.sender.id, [
+				self._list_reminders(viber_request)
+			])
+			else:
+				self._viber_api.send_messages(viber_request.sender.id, ["Unsupported command"])
+				raise Exception("Unsupported command: %s" % viber_request.message)
 		else:
-			raise Exception("Unsupported command: %s" % viber_request.message)
+			raise Exception("Failed receiving message")
 
 	def _list_reminders(self, viber_request: ViberMessageRequest) -> None:
 		try:
-			message = viber_request.message
-			# bot_name = message.bot.name
-			# text = message.text
-
 			render_context: list = {
 				"remiders":[
 					{
@@ -73,20 +75,8 @@ class ViberBot:
 
 			response_text: str = render_template_message(__name__, "reminders.mustache.txt", render_context)
 
-
-			self._viber_api.send_messages(viber_request.sender.id, [response_text])
-			# context.bot.send_message(
-			# 	chat_id = update.effective_chat.id,
-			# 	reply_to_message_id = message.message_id,
-			# 	text = response_text,
-			# 	parse_mode = ParseMode.MARKDOWN
-			# )
+			return response_text
 		except Exception as ex:
-			# context.bot.send_message(
-			# 	chat_id = update.effective_chat.id,
-			# 	reply_to_message_id = message.message_id,
-			# 	text = str(ex)
-			# )
-			pass
-		pass
+			text = str(ex)
+			return text
 
