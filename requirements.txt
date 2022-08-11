@@ -9,7 +9,6 @@ future==0.18.2
 idna==3.3
 itsdangerous==2.1.2
 Jinja2==3.1.2
-lxml==4.9.0
 MarkupSafe==2.1.1
 pymongo==4.2.0
 python-telegram-bot==13.13
@@ -21,7 +20,6 @@ tornado==6.2
 typing_extensions==4.3.0
 tzdata==2022.1
 tzlocal==4.2
-unittest-xml-reporting==3.2.0
 urllib3==1.26.11
 viberbot==1.0.12
 Werkzeug==2.2.0
