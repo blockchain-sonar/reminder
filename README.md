@@ -39,7 +39,7 @@ python3.10 -m unittest -v
 1. Optionally (only for bots with webhook), open separate terminal
 	* Start `ngrok` to pass local port into Internet
 	```
-	ngrok http 8080
+	~/opt/ngrok/ngrok http 8080
 	```
 	* Set `BSR_CALLBACK_BASE_URL` to NGROK's URL
 1. Start debugging by "Backend App" launch configuration
