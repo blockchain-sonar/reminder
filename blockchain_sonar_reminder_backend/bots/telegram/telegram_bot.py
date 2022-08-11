@@ -1,8 +1,10 @@
+from chevron import render
 from threading import Event
 from typing import Optional
+from urllib.parse import quote, ParseResult
 
-from telegram import Chat, Message, ParseMode, Update
-from telegram.ext import CallbackContext, CommandHandler, Handler, Updater
+from telegram import Chat, KeyboardButton, Message, ParseMode, ReplyKeyboardMarkup, Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import CallbackContext, CommandHandler, Filters, Handler, MessageHandler, Updater
 from telegram.utils.helpers import escape_markdown
 
 from blockchain_sonar_reminder_backend.services.reminder import ReminderService
@@ -40,6 +42,12 @@ class TelegramBot:
 		self._updater.dispatcher.add_handler(start_handler)
 
 		status_handler = CommandHandler('reminders', self._authorize(self._list_reminders))
+		self._updater.dispatcher.add_handler(status_handler)
+
+		status_handler = CommandHandler('reminder_add', self._authorize(self._list_reminders))
+		self._updater.dispatcher.add_handler(status_handler)
+
+		status_handler = CommandHandler('reminder_remove', self._authorize(self._list_reminders))
 		self._updater.dispatcher.add_handler(status_handler)
 
 		# echo_handler = MessageHandler(Filters.text & (~Filters.command), self._message)
@@ -85,9 +93,74 @@ class TelegramBot:
 
 	def _start(self, update: Update, context: CallbackContext) -> None:
 		context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a Blockchain Sonar's Reminder Bot, please talk to me!")
-
 	# def _message(self, update: Update, context: CallbackContext) -> None:
 	# 	context.bot.send_message(chat_id=update.effective_chat.id, text=update.message.text)
+
+	def _list_reminders(self, update: Update, context: CallbackContext) -> None:
+		try:
+			message = update.message
+			bot_name = message.bot.name
+			text = message.text
+
+			render_context: list = {
+				"remiders_add":[
+					{
+						"tag": "Thanks for using our services"
+					},
+					{
+						"tag": "Ololo 2"
+					}
+				]
+			}
+
+			response_text: str = render_template_message(__name__, "reminder_add.mustache.txt", render_context)
+
+			context.bot.send_message(
+				chat_id = update.effective_chat.id,
+				reply_to_message_id = message.message_id,
+				text = response_text,
+				parse_mode = ParseMode.MARKDOWN
+			)
+		except Exception as ex:
+			context.bot.send_message(
+				chat_id = update.effective_chat.id,
+				reply_to_message_id = message.message_id,
+				text = str(ex)
+			)
+		pass
+
+	def _list_reminders(self, update: Update, context: CallbackContext) -> None:
+		try:
+			message = update.message
+			bot_name = message.bot.name
+			text = message.text
+
+			render_context: list = {
+				"reminder_remove":[
+					{
+						"tag": "Ololo 1"
+					},
+					{
+						"tag": "Ololo 2"
+					}
+				]
+			}
+
+			response_text: str = render_template_message(__name__, "reminder_remove.mustache.txt", render_context)
+
+			context.bot.send_message(
+				chat_id = update.effective_chat.id,
+				reply_to_message_id = message.message_id,
+				text = response_text,
+				parse_mode = ParseMode.MARKDOWN
+			)
+		except Exception as ex:
+			context.bot.send_message(
+				chat_id = update.effective_chat.id,
+				reply_to_message_id = message.message_id,
+				text = str(ex)
+			)
+		pass
 
 	def _list_reminders(self, update: Update, context: CallbackContext) -> None:
 		try:
