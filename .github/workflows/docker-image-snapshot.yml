@@ -1,12 +1,17 @@
 # GITHUB_REPOSITORY - The owner and repository name. For example, octocat/Hello-World.
 # https://docs.github.com/en/actions/learn-github-actions/environment-variables
 
-name: Docker Image (Release)
+name: Docker Image (Snapshot)
 
 on:
   push:
-    tags:
+    branches:
       - '*'
+    tags:
+      - $default-branch
+  pull_request:
+    branches:
+      - $default-branch
 
 jobs:
   default:
@@ -38,9 +43,11 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ghcr.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}/snapshot
           # generate Docker tags based on the following events/attributes
           tags: |
+            type=raw,value={{branch}}
+            type=raw,value={{branch}}.{{sha}}
             type=ref,event=tag
 
       # See https://github.com/docker/login-action
@@ -58,7 +65,7 @@ jobs:
           context: .
           file: docker/Dockerfile
           build-args: |
-            BUILD_CONFIGURATION=release
+            BUILD_CONFIGURATION=snapshot
           platforms: ${{ matrix.platform }}
           push: false
           load: true

@@ -1,0 +1,39 @@
+ARG BUILD_IMAGE=python:3.10-alpine3.15
+ARG TEST_IMAGE=ghcr.io/blockchain-sonar/reminder/local
+
+FROM ${TEST_IMAGE} AS test_image
+
+FROM ${BUILD_IMAGE} AS builder
+RUN apk add --no-cache build-base libxml2-dev libxslt-dev
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE=1
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED=1
+WORKDIR /usr/local/blockchain-sonar/reminder/backend
+# Copy necessary files
+COPY requirements.txt requirements-dev.txt ./
+RUN \
+	python3 -m venv .venv && \
+	source .venv/bin/activate && \
+	pip install --upgrade pip && \
+	pip install --requirement requirements-dev.txt && \
+	mkdir junit
+RUN source .venv/bin/activate && \
+	pip install xmlrunner
+COPY test ./test
+COPY --from=test_image /usr/local/blockchain-sonar/reminder/backend/blockchain_sonar_reminder_backend /usr/local/blockchain-sonar/reminder/backend/
+COPY docker/docker-entrypoint-tests.sh /usr/local/bin/
+VOLUME [ "/data" ]
+CMD [ "/usr/local/bin/docker-entrypoint-tests.sh" ]
+# CMD [ "python", "-m", "xmlrunner", "discover", "--output-file", "junit/test-results.xml", "-v" ]
+
+#   export PYTHONPATH="${PWD};${PYTHONPATH}"
+#   python -c "import sys;print(sys.path)"
+#   mkdir junit
+
+
+#COPY docker/docker-entrypoint.sh /stage/usr/local/bin/
+# FROM ${TEST_IMAGE} 
+# ENV BSE_MONGO_URL=
+# EXPOSE 8080
+# CMD [ "/usr/local/bin/docker-entrypoint.sh" ]

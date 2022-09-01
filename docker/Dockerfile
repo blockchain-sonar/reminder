@@ -1,6 +1,8 @@
 ARG IMAGE=python:3.10-alpine3.15
+ARG BUILD_CONFIGURATION=local
 
 FROM ${IMAGE} AS builder
+ARG BUILD_CONFIGURATION
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
 # Turns off buffering for easier container logging
@@ -17,6 +19,7 @@ COPY blockchain_sonar_reminder_backend ./blockchain_sonar_reminder_backend
 # Move binary to stage directory
 RUN mkdir -p /stage/usr/local/blockchain-sonar/reminder && mv /usr/local/blockchain-sonar/reminder/backend /stage/usr/local/blockchain-sonar/reminder/
 COPY docker/docker-entrypoint.sh /stage/usr/local/bin/
+RUN echo "${BUILD_CONFIGURATION}" >> /stage/BUILD_CONFIGURATION
 
 FROM ${IMAGE}
 COPY --from=builder /stage /

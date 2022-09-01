@@ -1,5 +1,8 @@
 ./*
 
 !/blockchain_sonar_reminder_backend
+!/test
+!/docker/docker-entrypoint-tests.sh
 !/docker/docker-entrypoint.sh
+!/requirements-dev.txt
 !/requirements.txt

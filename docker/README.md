@@ -1,8 +1,15 @@
 
 ### Build
 ```shell
-docker build --tag  ghcr.io/blockchain-sonar/reminder/local \
+docker build --tag ghcr.io/blockchain-sonar/reminder/local \
     --file docker/Dockerfile .
+```
+
+### Run Tests
+```shell
+docker build --tag ghcr.io/blockchain-sonar/reminder/local-tests \
+    --file docker/Dockerfile.tests .
+docker run --interactive --rm ghcr.io/blockchain-sonar/reminder/local-tests
 ```
 
 ### Run
